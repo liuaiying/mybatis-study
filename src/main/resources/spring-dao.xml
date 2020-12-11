@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="gbk"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--1.关联数据库配置文件-->
+    <context:property-placeholder location="classpath:db.properties"></context:property-placeholder>
+
+    <!--2.连接池-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.class}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.user}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--3.sqlSessionFactory-->
+    <bean id="sqlSessionFactory" class="com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <!--绑定Mybatis主配置文件-->
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <!--拦截器-->
+        <property name="plugins">
+            <array>
+                <!--分页插件-->
+                <bean class="com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor"></bean>
+            </array>
+        </property>
+        <!--引入我们的全局配置-->
+<!--        <property name="globalConfig" ref="globalConfiguration"></property>-->
+    </bean>
+
+    <bean id="sessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
+    </bean>
+
+    <!--配置Dao扫描包，动态实现Dao接口可以注入到Spring容器中  等同于EmpDaoImpl-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--注入sqlSessionFactory-->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+        <!--要扫描的dao（mapper）包-->
+        <property name="basePackage" value="com.hy.mybatis.dao"/>
+    </bean>
+</beans>

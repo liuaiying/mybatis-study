@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hy.mybatis.dao.EmpMapper">
+    <!--嵌套查询（多表查询）-->
+    <resultMap id="queryAll_map" type="empBean">
+        <association property="deptBean" column="deptno" javaType="deptBean" select="com.hy.mybatis.dao.DeptMapper.selectDeptById"/>
+    </resultMap>
+    <!--查询/模糊查询-->
+    <select id="queryAll" parameterType="empBean" resultMap="queryAll_map">
+        select * from emp
+        <where>
+            <if test="emp.ename!=null and emp.ename!=''">
+                and ENAME='${emp.ename}'
+            </if>
+            <if test="emp.job!=null and emp.job!=''">
+                and JOB='${emp.job}'
+            </if>
+            <if test="emp.deptno!=null and emp.deptno!=''">
+                and DEPTNO=${emp.deptno}
+            </if>
+        </where>
+    </select>
+    <!--返回对象-->
+    <!--<select id="selectEmpById" parameterType="string" resultType="empBean">
+        select * from EMP where EMPNO = #{VALUE}
+    </select>-->
+    <!--修改-->
+<!--    <update id="updateEmp" parameterType="empBean">
+        UPDATE EMP SET ENAME=#{ename}, JOB=#{job}, MGR=#{mgr}, HIREDATE=#{hiredate}, SAL=#{sal}, COMM=#{comm}, DEPTNO=#{deptno},IMG=#{img}WHERE EMPNO = #{empno}
+    </update>-->
+    <!--添加-->
+  <!--  <insert id="insertEmp" parameterType="empBean">
+        /*主键生成策略*/
+        <selectKey keyProperty="empno" resultType="string" order="BEFORE">
+            select sys_guid() from dual
+        </selectKey>
+        insert into EMP(EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,IMG) VALUES(#{empno},#{ename},#{job},#{mgr},#{hiredate},#{sal},#{comm},#{deptno},#{img})
+    </insert>-->
+    <!--删除-->
+ <!--   <delete id="deleteEmp" parameterType="string">
+        delete from EMP where EMPNO = #{VALUE}
+    </delete>-->
+    
+    <!--批量删除-->
+    <delete id="delDataFilesByIds" parameterType="string">
+        delete from EMP where EMPNO in
+        <foreach collection="ids"  open="(" close=")" separator=","  item="item" >
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

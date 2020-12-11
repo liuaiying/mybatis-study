@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>xuhy.layui</title>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+</head>
+<body>
+<script src="../layui/layui.js"></script>
+
+<form class="layui-form layui-form-pane" action="" onsubmit="return false" lay-filter="formm">
+    <input type="hidden" id="empno" name="empno">
+    <input type="hidden" id="img" name="img">
+    <div class="layui-form-item" style="margin-left: 169px">
+        <label class="layui-form-label">姓名</label>
+        <div class="layui-input-inline">
+            <input type="text" id="ename" name="ename" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="margin-left: 169px">
+        <label class="layui-form-label">工作</label>
+        <div class="layui-input-inline">
+            <input type="text" id="job" name="job" lay-verify="required" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="margin-left: 169px">
+        <label class="layui-form-label">经理</label>
+        <div class="layui-input-inline">
+            <input type="text" id="mgr" name="mgr" lay-verify="required" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="margin-left: 169px">
+        <div class="layui-inline">
+            <label class="layui-form-label">入职日期</label>
+            <div class="layui-input-block">
+                <input type="text" id="hiredate" name="hiredate"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item" >
+            <label class="layui-form-label">工资</label>
+            <div class="layui-input-inline">
+                <input type="text" id="sal" name="sal" lay-verify="required" placeholder="请输入" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">comm</label>
+            <div class="layui-input-inline">
+                <input type="text" id="comm" name="comm" lay-verify="required" placeholder="请输入" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">所在部门</label>
+            <div class="layui-input-inline">
+                <select name="deptno" id="did" lay-verify="">
+                </select>
+            </div>
+        </div>
+        <div class="layui-upload-drag" id="test1" style="margin-left: 25px;">
+            <i class="layui-icon"></i>
+            <p>点击上传，或将文件拖拽到此处</p>
+            <div class="layui-hide" id="uploadDemoView">
+                <hr>
+                <img src="" alt="上传成功后渲染" style="max-width: 196px">
+            </div>
+        </div>
+        <div class="layui-inline" style="margin-left: 70px">
+            <div class="layui-inline">
+                <button class="layui-btn" lay-submit="" lay-filter="formDemo" id="sub" style="margin-top: 5px;">提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary" id="cz">重置</button>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<script>
+    //就绪
+    layui.use(['layer', 'form', 'laydate','upload'], function () {
+        // 重写方法，自定义格式化日期
+        Date.prototype.toLocaleString = function () {
+            function addZero(num) {
+                if (num < 10)
+                    return "0" + num;
+                return num;
+            }
+
+            // 按自定义拼接格式返回
+            return this.getFullYear() + "-" + addZero(this.getMonth() + 1) + "-" + addZero(this.getDate());
+        };
+
+        var $ = layui.$, layer = layui.layer;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var $ = layui.jquery,upload = layui.upload;
+
+        laydate.render({
+            elem: '#hiredate'
+        });
+
+        //多图片上传
+        upload.render({
+            elem: '#test1'
+            ,url: '/upload' //改成您自己的上传接口
+            ,field:'file'
+            ,done: function(res){
+                if(res.data[0].img!=''){
+                    layer.msg("上传成功");
+                    $('#img').val(res.data[0].img);
+                    layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', "/ssmupload/"+res.data[0].img);
+                }else {
+                    layer.msg("添加失败")
+                }
+            }
+        });
+
+        var search=window.location.search;
+        console.log(search)
+        $.ajax({
+            type: "post",
+            dataType: 'json',
+            url: "/queryById2"+search,
+            success: function (list) {
+                console.log(list.hiredate);
+                $("#ename").val(list.ename);
+                $("#empno").val(list.empno);
+                $("#mgr").val(list.mgr);
+                $("#img").val(list.img);
+                $("#comm").val(list.comm);
+                $("#job").val(list.job);
+                $("#sal").val(list.sal);
+
+        $.ajax({
+            type: "post",
+            dataType: 'json',
+            url: "/queryAllDept",
+            success: function (data) {
+                var html = " <option value='0'>请选择</option>";
+                     for (var i = 0; i < data.length; i++) {
+                          if(data[i].deptno==list.deptno){
+                              html += "<option value=" + data[i].deptno + " selected>" + data[i].dname + "</option>"
+                        }else{
+                              html += "<option value=" + data[i].deptno + ">" + data[i].dname + "</option>"
+                            }
+                        }
+                        $("#did").html(html);
+                        //下拉框渲染
+                        layui.form.render("select");
+                    },
+                    error: function () {
+                        layer.msg("出现错误");
+                    },
+                })
+                // 根据毫秒数构建 Date 对象
+                var date = new Date(list.hiredate);
+            // 按重写的自定义格式，格式化日期
+                dateTime = date.toLocaleString();
+                $('#hiredate').val(dateTime);
+                layui.$('#uploadDemoView').removeClass('layui-hide').find('img').attr('src', "/ssmupload/" + list.img);
+            },
+            error: function () {
+                layer.msg("出现错误");
+            },
+        })
+
+        //表单监听提交
+        form.on('submit(formDemo)', function(data){
+            console.log(data.field)
+            $.ajax({
+                type: 'post'
+                ,url:'/updateEmp'
+                ,data:data.field//把表单的内容以键值对的方式绑定到接口 可以拿对象接收
+                ,success:function (res) {
+                    if(res>0){
+                        layer.msg("修改成功");
+                        //自动关闭弹出层
+                        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                        parent.layer.close(index); //再执行关闭
+                    }else{
+                        layer.msg("修改成功");
+                    }
+                }
+            })
+        });
+
+    });
+</script>
+
+
+</body>
+</html>

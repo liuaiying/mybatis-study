@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+<!--    日志-->
+    <settings>
+        <setting name="logImpl" value="LOG4J"/>
+    </settings>
+<!--    别名-->
+    <typeAliases>
+        <package name="com.hy.mybatis.pojo"/>
+    </typeAliases>
+<!--加载映射文件-->
+    <mappers>
+        <!--当接口名和xml一致时可以直接使用class  若不一致则用resource 并且路径要用 ‘/’-->
+        <!--<mapper class="com.hy.mybatis.dao.EmpMapper"></mapper>-->
+        <package name="com.hy.mybatis.dao"/>
+    </mappers>
+
+    
+</configuration>
